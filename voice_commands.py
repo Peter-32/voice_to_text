@@ -102,7 +102,8 @@ def append_ideas_to_list(text):
     if text == "":
         return
     clip.copy(text)
-    time.sleep(0.2)
+    time.sleep(1)
+    print(text)
     keyboard2 = Controller()
     keyboard2.press(Key.cmd.value)
     keyboard2.press('v')
