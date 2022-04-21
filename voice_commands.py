@@ -8,18 +8,13 @@ import sys
 import pyttsx3
 import time
 import wave
-import pandas as pd
+from googletrans import Translator
 
 import pyaudio
-import pyautogui as g
 import pyperclip as clip
 import speech_recognition as sr
 from pynput.keyboard import Listener, KeyCode
 from pynput.keyboard import Key, Controller
-
-g.size()
-g.FAILSAFE = True
-g.PAUSE = 0
 
 current_directory = os.path.dirname(os.path.realpath("__file__")) + "/"
 data_directory = os.path.join(current_directory, 'data')
@@ -92,18 +87,45 @@ def react_to_recording():
 
 def speak_text(text):
     engine = pyttsx3.init()
+    engine.setProperty('voice', "com.apple.speech.synthesis.voice.yuna") # KO: com.apple.speech.synthesis.voice.yuna # Hindi: com.apple.speech.synthesis.voice.lekha
     engine.startLoop(False)
     engine.say(text)
     engine.iterate()
     time.sleep(0.10*len(text))
     engine.endLoop()
-    
-def append_ideas_to_list(text):
+
+def my_translation(response):
+    try:
+        translator = Translator()
+        response = translator.translate(response, src='en', dest='ko').pronunciation # hi, ja, ko
+    except:
+        pass
+    return response
+
+def respond_to_command(text):
     if text == "":
         return
-    clip.copy(text)
-    time.sleep(1)
     print(text)
+    if text.startswith("python"):
+        python_logic(text)
+    else:
+        regular_logic(text)
+
+def python_logic(text):
+    if "if" in text:
+        text = """if condition:
+    pass
+else:
+    pass"""
+    clip.copy(text)
+    time.sleep(0.25)
+    keyboard2 = Controller()
+    keyboard2.press(Key.cmd.value)
+    keyboard2.press('v')
+
+def regular_logic(text):
+    clip.copy(text)
+    time.sleep(0.25)
     keyboard2 = Controller()
     keyboard2.press(Key.cmd.value)
     keyboard2.press('v')
@@ -111,7 +133,7 @@ def append_ideas_to_list(text):
 CHUNK = 8192
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
-RATE = 44100 
+RATE = 44100
 while True:
     p = pyaudio.PyAudio()
     frames = []
@@ -127,9 +149,7 @@ while True:
     command = react_to_recording()
     command = "" if command == None else command.lower()
     response = command
-    append_ideas_to_list(response)
+    respond_to_command(response)
+    # response = my_translation(response)
     # speak_text(response)
     previously_listening = False
-    
-
-
