@@ -9,12 +9,17 @@ import pyttsx3
 import time
 import wave
 from googletrans import Translator
+import pandas as pd
 
 import pyaudio
 import pyperclip as clip
 import speech_recognition as sr
 from pynput.keyboard import Listener, KeyCode
 from pynput.keyboard import Key, Controller
+from fuzzywuzzy import process
+
+
+voice_commands = pd.read_csv("commands.csv").set_index('voice_command').to_dict()['result']
 
 current_directory = os.path.dirname(os.path.realpath("__file__")) + "/"
 data_directory = os.path.join(current_directory, 'data')
@@ -149,6 +154,9 @@ while True:
     command = react_to_recording()
     command = "" if command == None else command.lower()
     response = command
+    if command.startswith("python"):
+        best_match = process.extractOne(command, voice_commands.keys())[0]
+        response = voice_commands.get(best_match, command)
     respond_to_command(response)
     # response = my_translation(response)
     # speak_text(response)
